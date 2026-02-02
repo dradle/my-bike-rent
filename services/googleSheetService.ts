@@ -21,6 +21,12 @@ export const fetchCustomerData = async (sheetName: string): Promise<CustomerData
     const jsonString = textData.substring(47).slice(0, -2);
     const json: SheetResponse = JSON.parse(jsonString);
 
+    // Check for explicit API errors
+    if (json.status === 'error') {
+      console.error("Google API Error:", json.errors);
+      throw new Error("Клиент с таким именем не найден.");
+    }
+
     if (!json.table || !json.table.rows) {
       throw new Error("Invalid sheet structure or sheet not found.");
     }
@@ -29,12 +35,26 @@ export const fetchCustomerData = async (sheetName: string): Promise<CustomerData
 
     // Helper to safely get cell content
     // Google Sheets rows are 0-indexed.
-    // A=0, B=1, C=2, D=3, E=4
+    // A=0, B=1, C=2, D=3, E=4, F=5
     const getCell = (rowIndex: number, colIndex: number): any => {
       if (!rows[rowIndex]) return null;
+      // Provide fallback for shorter rows
+      if (!rows[rowIndex].c || rows[rowIndex].c.length <= colIndex) return null;
+      
       const cell = rows[rowIndex].c[colIndex];
       return cell ? (cell.v ?? null) : null;
     };
+
+    // --- SECURITY CHECK (Validation) ---
+    // Google API usually defaults to the first sheet if the requested name is wrong.
+    // To prevent this, we check Cell F1 (Index 5). It MUST contain the Client Name.
+    const validationName = String(getCell(0, 5) || '').trim();
+    
+    // If F1 is empty or doesn't match the requested sheet name (case-insensitive check), reject it.
+    if (validationName.toLowerCase() !== sheetName.toLowerCase()) {
+      console.warn(`Security Mismatch: Requested '${sheetName}' but sheet identity (F1) is '${validationName}'`);
+      throw new Error("Клиент не найден (ошибка верификации).");
+    }
 
     // --- Parse Header Data (Rows 1 & 2 -> Indices 0 & 1) ---
 
