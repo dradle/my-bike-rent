@@ -4,7 +4,7 @@ import { Bike } from 'lucide-react';
 
 const App: React.FC = () => {
   // Initialize state from URL parameter
-  const [clientName, setClientName] = useState<string | null>(() => {
+  const [clientName] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('client');
   });
@@ -19,14 +19,6 @@ const App: React.FC = () => {
         <p className="text-gray-500 max-w-md mb-8">
           Для доступа к личному кабинету, пожалуйста, перейдите по ссылке, которую вам отправил администратор.
         </p>
-
-        {/* Demo Button for easy preview */}
-        <button 
-          onClick={() => setClientName('Nazar')}
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30"
-        >
-          Демонстрация (Nazar)
-        </button>
 
         <p className="text-xs text-gray-400 mt-8">
           Пример: site.com/?client=ВашеИмя
