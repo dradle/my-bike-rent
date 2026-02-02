@@ -6,7 +6,12 @@ const App: React.FC = () => {
   // Initialize state from URL parameter
   const [clientName] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('client');
+    const client = params.get('client');
+    // Trim whitespace. If empty string remains, return null.
+    if (!client || client.trim() === '') {
+      return null;
+    }
+    return client.trim();
   });
 
   if (!clientName) {

@@ -25,7 +25,9 @@ export interface SheetRow {
 }
 
 export interface SheetResponse {
-  table: {
+  status?: string; // 'ok' or 'error'
+  errors?: { reason: string; message: string }[];
+  table?: {
     cols: any[];
     rows: SheetRow[];
   };
